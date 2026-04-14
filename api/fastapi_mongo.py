@@ -17,7 +17,7 @@ from pydantic import BaseModel, EmailStr
 from typing import List, Optional
 from datetime import datetime
 from bson.objectid import ObjectId
-from mongodb_database import DatabaseManager
+from backend.mongodb_database import DatabaseManager
 from dotenv import load_dotenv
 # from typing import Optional
 import os
