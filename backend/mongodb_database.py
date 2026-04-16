@@ -62,16 +62,16 @@ class DatabaseManager:
     #         print(f"Error creating post: {e}")
     #         return None
         
-    def get_all_users(self):
-        """Get all users"""
+    def get_all_transactions(self):
+        """Get all transactions"""
         try:
-            users = list(self.users_collection.find())
+            trans = list(self.transaction_collection.find())
             #Convert ObjectId to string for display
-            for user in users:
-                user['_id'] = str(user['_id'])
-            return users
+            for tran in trans:
+                tran['_id'] = str(tran['_id'])
+            return trans
         except Exception as e:
-            print(f"Error fetching users: {e}")
+            print(f"Error fetching transactions: {e}")
             return []
         
     # def get_user_posts(self, user_id):
@@ -96,16 +96,17 @@ class DatabaseManager:
     #         print(f"Error fetching users: {e}")
     #         return []
         
-    def update_user(self,user_id, name, email, age):
-        """Update existing user Id"""
+    def update_transaction(self,tran_id, name, transaction_type, description, paid, date):
+        """Update existing transaction Id"""
         try:
-            result = self.users_collection.update_one(
-                {"_id": ObjectId(user_id)},
+            result = self.transaction_collection.update_one(
+                {"_id": ObjectId(tran_id)},
                 {"$set": {
                     "name": name,
-                    "email": email,
-                    "age": age,
-                    "updated_at": datetime.now()
+                    "transaction_type": transaction_type,
+                    "description": description,
+                    "paid": paid,
+                    "date": date
                 }}
             )
             return result.modified_count
@@ -114,42 +115,42 @@ class DatabaseManager:
             print(f"Error: {e}")
             return None
 
-    def update_post(self,user_id, title, content):
-        """Update existing post based on user ID"""
-        try:
-            result = self.users_collection.update_one(
-                {"_id": ObjectId(user_id)},
-                {"$set": {
-                    "title": title,
-                    "content": content,
-                    "updated_at": datetime.now()
-                }}
-            )
-            return result.modified_count
-        except Exception as e:
-            print(f"Error: {e}")
-            return None
+    # def update_post(self,user_id, title, content):
+    #     """Update existing post based on user ID"""
+    #     try:
+    #         result = self.users_collection.update_one(
+    #             {"_id": ObjectId(user_id)},
+    #             {"$set": {
+    #                 "title": title,
+    #                 "content": content,
+    #                 "updated_at": datetime.now()
+    #             }}
+    #         )
+    #         return result.modified_count
+    #     except Exception as e:
+    #         print(f"Error: {e}")
+    #         return None
 
 
-    def delete_user(self, user_id):
-        """Delete user and their posts"""
+    def delete_user(self, tran_id):
+        """Delete transaction"""
         try:
             #Convert string user_id to ObjectId if it's a valid ObjectId
-            if ObjectId.is_valid(user_id):
-                user_object_id = ObjectId(user_id)
+            if ObjectId.is_valid(tran_id):
+                tran_object_id = ObjectId(tran_id)
             else:
-                user_object_id = user_id
+                tran_object_id = tran_id
 
             #Delete user's posts first
-            self.posts_collection.delete_many({"user_id": user_object_id})
+            # self.posts_collection.delete_many({"user_id": user_object_id})
 
             #Delete the user
-            result = self.users_collection.delete_one({"_id": user_object_id})
+            result = self.transaction_collection.delete_one({"_id": tran_object_id})
 
             return result.deleted_count > 0
         
         except Exception as e:
-            print(f"Error deleteing user: {e}")
+            print(f"Error deleting transaction: {e}")
             return False
     
     def close_connection(self):
