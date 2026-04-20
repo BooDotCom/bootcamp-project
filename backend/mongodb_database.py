@@ -188,31 +188,45 @@ def main():
 
             print("\n--- Create New Transaction ---")
             name = input("Enter name: ").strip()
-            try:
-                amount = int(input("Enter amount: ").strip())
-                if amount <0:
-                    raise ValueError("Amount must not be negative.")
-            except ValueError:
-                print("Invalid amount. Please enter a number.")
+            while True:
+                try:
+                    amount = int(input("Enter amount: ").strip())
+                    if amount <0:
+                        raise ValueError("Amount must not be negative.")
+                    break
+                except ValueError as e:
+                    print(f"Invalid amount: {e}. Please enter a number.")
 
             paid = "Yes" if amount > 0 else "No"
 
-            transaction_type = input("Enter transaction type(Debit or Credit): ").strip()
-            if transaction_type not in ["Debit", "Credit"]:
-                raise Exception("Transaction type can only be Debit or Credit.")
-            
-            description = input("Enter description: ").strip()
-            date_str = input("Enter date of transaction: ").strip()
-            date_str = date_str.replace("/", "-")
-            try:
-                date = datetime.strptime(date_str, "%d-%m-%Y")
-                tran_id = db.create_transaction(name, amount, transaction_type, description, paid, date)
-                if tran_id:
-                    print(f"Transaction created successfully! ID: {tran_id}")
-                else:
-                    print("Failed to create transaction.")
-            except ValueError:
-                print("Please enter a valid date.")
+            if amount == 0:
+                #skip input for these fields if unpaid
+                transaction_type = ""
+                description = ""
+                date = None
+            else:
+                while True:
+                    transaction_type = input("Enter transaction type(Debit or Credit): ").strip().lower()
+                    if transaction_type in ["debit", "credit"]:
+                        break
+                    print("Transaction type can only be Debit or Credit.")
+                
+                description = input("Enter description: ").strip()
+                
+                while True:
+                    date_str = input("Enter date of transaction: ").strip()
+                    date_str = date_str.replace("/", "-")
+                    try:
+                        date = datetime.strptime(date_str, "%d-%m-%Y")
+                        break
+                    except ValueError:
+                        print("Please enter a valid date.")
+
+            tran_id = db.create_transaction(name, amount, transaction_type, description, paid, date)
+            if tran_id:
+                print(f"Transaction created successfully! ID: {tran_id}")
+            else:
+                print("Failed to create transaction.")
 
             # try:
             #     age = int(input("Enter age: ").strip())
