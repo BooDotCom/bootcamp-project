@@ -270,7 +270,7 @@ def main():
                     except ValueError:
                         print("Please enter a valid date.")
 
-            tran_updated = db.update_user(tran_id, name, amount, transaction_type, description, paid, date)
+            tran_updated = db.update_transaction(tran_id, name, amount, transaction_type, description, paid, date)
             if tran_updated:
                 print(f"Transaction {tran_id} updated successfully!")
             else:
