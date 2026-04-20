@@ -75,33 +75,28 @@ class DatabaseManager:
             print(f"Error fetching transactions: {e}")
             return []
         
-    def get_paid_by_year(self, year):
-        """Get paid transactions for specific year."""
+    def get_transaction_by_year(self, year, paid):
+        """Get transactions for specific year."""
         try:
             start_date = datetime(year,1,1)
             end_date = datetime(year,12,31)
 
-            trans = list(self.transaction_collection.find({
-                "paid": "Yes",
-                "date":{
-                    "$gte": start_date,
-                    "$lte": end_date
-                }
-            }))
-            for tran in trans:
-                tran['_id'] = str(tran['_id'])
-            return trans
-        except Exception as e:
-            print(f"Error fetching transactions: {e}")
-            return []
-        
-    def get_unpaid(self):
-        """Get unpaid transactions"""
-        try:
-            trans = list(self.transaction_collection.find({
-                "paid": "No"
-            }))
-
+            if paid == "paid":
+                trans = list(self.transaction_collection.find({
+                    "paid": "Yes",
+                    "date":{
+                        "$gte": start_date,
+                        "$lte": end_date
+                    }
+                }))
+            elif paid == "unpaid":
+                trans = list(self.transaction_collection.find({
+                    "paid": "No",
+                    "date":{
+                        "$gte": start_date,
+                        "$lte": end_date
+                    }
+                }))
             for tran in trans:
                 tran['_id'] = str(tran['_id'])
             return trans
@@ -219,7 +214,7 @@ def main():
 
     while True:
         display_menu()
-        choice = input("Enter your choice (1-5): ").strip()
+        choice = input("Enter your choice (1-7): ").strip()
 
         if choice == '1':
 
@@ -238,9 +233,8 @@ def main():
 
             if amount == 0:
                 #skip input for these fields if unpaid
-                transaction_type = ""
+                transaction_type = "debit"
                 description = ""
-                date = None
             else:
                 while True:
                     transaction_type = input("Enter transaction type(Debit or Credit): ").strip().lower()
@@ -250,14 +244,14 @@ def main():
                 
                 description = input("Enter description: ").strip()
                 
-                while True:
-                    date_str = input("Enter date of transaction: ").strip()
-                    date_str = date_str.replace("/", "-")
-                    try:
-                        date = datetime.strptime(date_str, "%d-%m-%Y")
-                        break
-                    except ValueError:
-                        print("Please enter a valid date.")
+            while True:
+                date_str = input("Enter date of transaction: ").strip()
+                date_str = date_str.replace("/", "-")
+                try:
+                    date = datetime.strptime(date_str, "%d-%m-%Y")
+                    break
+                except ValueError:
+                    print("Please enter a valid date.")
 
             tran_id = db.create_transaction(name, amount, transaction_type, description, paid, date)
             if tran_id:
@@ -285,9 +279,8 @@ def main():
 
             if amount == 0:
                 #skip input for these fields if unpaid
-                transaction_type = ""
+                transaction_type = "debit"
                 description = ""
-                date = None
             else:
                 while True:
                     transaction_type = input("Enter transaction type(Debit or Credit): ").strip().lower()
@@ -297,14 +290,14 @@ def main():
                 
                 description = input("Enter description: ").strip()
                 
-                while True:
-                    date_str = input("Enter date of transaction: ").strip()
-                    date_str = date_str.replace("/", "-")
-                    try:
-                        date = datetime.strptime(date_str, "%d-%m-%Y")
-                        break
-                    except ValueError:
-                        print("Please enter a valid date.")
+            while True:
+                date_str = input("Enter date of transaction: ").strip()
+                date_str = date_str.replace("/", "-")
+                try:
+                    date = datetime.strptime(date_str, "%d-%m-%Y")
+                    break
+                except ValueError:
+                    print("Please enter a valid date.")
 
             tran_updated = db.update_transaction(tran_id, name, amount, transaction_type, description, paid, date)
             if tran_updated:
@@ -324,29 +317,47 @@ def main():
 
         elif choice == '4':
             # print("Not there yet.")
-            print("\n--- Paid Transactions by Year ---")
+            print("\n--- Transactions by Year ---")
 
             try:
                 year = int(input("Enter year: ").strip())
-                trans = db.get_paid_by_year(year)
-                if trans:
-                    for tran in trans:
-                        print(f"ID: {tran['_id']} | Name: {tran['name']} | Amount: {tran['amount']} | Paid: {tran['paid']} | Date: {tran['date']}")
-                else:
-                    print(f"No paid transactions found for year {year}.")
             except ValueError:
                 print("Invalid year. Please enter a valid number.")
-
-        elif choice == '5':
-            # print("Not there yet")
             
-            print("\n--- Unpaid Transactions ---")
-            trans = db.get_unpaid()
-            if trans:
-                for tran in trans:
-                    print(f"ID: {tran['_id']} | Name: {tran['name']}| Date: {tran['date']}")
-            else:
-                print("No unpaid transactions found.")
+            while True:
+                paid = input("Do you want to check for paid or unpaid: ").strip().lower()
+                if paid in ["paid", "unpaid"]:
+                    if paid == "paid":
+                        trans = db.get_transaction_by_year(year, paid)
+                        if trans:
+                            for tran in trans:
+                                print(f"ID: {tran['_id']} | Name: {tran['name']} | Amount: {tran['amount']} | Date: {tran['date']}")
+                            break
+                        else:
+                            print(f"No paid transactions found for year {year}.")
+                            break
+                    elif paid == "unpaid":
+                        trans = db.get_transaction_by_year(year, paid)
+                        if trans:
+                            for tran in trans:
+                                print(f"ID: {tran['_id']} | Name: {tran['name']} | Date: {tran['date']}")
+                            break
+                        else:
+                            print(f"No paid transactions found for year {year}.")
+                            break
+                else:
+                    print("Please type 'paid' or 'unpaid'")
+
+        # elif choice == '5':
+        #     # print("Not there yet")
+            
+        #     print("\n--- Unpaid Transactions ---")
+        #     trans = db.get_unpaid_by_year()
+        #     if trans:
+        #         for tran in trans:
+        #             print(f"ID: {tran['_id']} | Name: {tran['name']} | Date: {tran['date']}")
+        #     else:
+        #         print("No unpaid transactions found.")
 
             
         # elif choice == '6':
