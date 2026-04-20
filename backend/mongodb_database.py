@@ -63,17 +63,17 @@ class DatabaseManager:
     #         print(f"Error creating post: {e}")
     #         return None
         
-    # def get_all_transactions(self):
-    #     """Get all transactions"""
-    #     try:
-    #         trans = list(self.transaction_collection.find())
-    #         #Convert ObjectId to string for display
-    #         for tran in trans:
-    #             tran['_id'] = str(tran['_id'])
-    #         return trans
-    #     except Exception as e:
-    #         print(f"Error fetching transactions: {e}")
-    #         return []
+    def get_all_transactions(self):
+        """Get all transactions"""
+        try:
+            trans = list(self.transaction_collection.find())
+            #Convert ObjectId to string for display
+            for tran in trans:
+                tran['_id'] = str(tran['_id'])
+            return trans
+        except Exception as e:
+            print(f"Error fetching transactions: {e}")
+            return []
         
     # def get_user_posts(self, user_id):
     #     """Get posts by user"""
@@ -257,14 +257,14 @@ def main():
             #     print("Invalid input. Please enter numbers for age.")
 
         elif choice == '3':
-            print("Not there yet.")
-            # print("\n--- All Users ---")
-            # users = db.get_all_users()
-            # if users:
-            #     for user in users:
-            #         print(f"ID: {user['_id']} | Name: {user['name']} | Email: {user['email']} | Age: {user['age']}")
-            # else:
-            #     print("No users found.")
+            # print("Not there yet.")
+            print("\n--- All Transactions ---")
+            trans = db.get_all_transactions()
+            if trans:
+                for tran in trans:
+                    print(f"ID: {tran['_id']} | Name: {tran['name']} | Amount: {tran['amount']} | Transaction Type: {tran['transaction_type']} | Description: {tran['description']} | Paid: {tran['paid']} | Date: {tran['date']}")
+            else:
+                print("No transactions found.")
 
         elif choice == '4':
             print("Not there yet.")
