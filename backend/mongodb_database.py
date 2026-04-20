@@ -196,10 +196,9 @@ def display_menu():
     print("1. Create Transaction")
     print("2. Update Transaction")
     print("3. View All Transactions")
-    print("4. View Paid Transactions by Year")
-    print("5. View Unpaid Transactions")
-    print("6. Delete Transaction")
-    print("7. Exit")
+    print("4. View Transactions by Year")
+    print("5. Delete Transaction")
+    print("6. Exit")
     print("-"*40)
 
 def main():
@@ -214,7 +213,7 @@ def main():
 
     while True:
         display_menu()
-        choice = input("Enter your choice (1-7): ").strip()
+        choice = input("Enter your choice (1-6): ").strip()
 
         if choice == '1':
 
@@ -375,11 +374,11 @@ def main():
             # else:
             #     print("No posts found for this user.")
 
-        elif choice == '6':
+        elif choice == '5':
             print("\n--- Delete Transaction ---")
 
-            tran_id = input("Enter user ID to delete: ").strip()
-            confirm = input(f"Are you sure you want to delete user {tran_id}? (y/n): ").strip().lower()
+            tran_id = input("Enter transaction ID to delete: ").strip()
+            confirm = input(f"Are you sure you want to delete transaction {tran_id}? (y/n): ").strip().lower()
 
             if confirm == 'y':
                 if db.delete_transaction(tran_id):
@@ -389,7 +388,7 @@ def main():
             else:
                 print("Deletion cancelled")
 
-        elif choice == '7':
+        elif choice == '6':
             print("\nClosing database connection...")
             db.close_connection()
             print("\nGoodbye.")
