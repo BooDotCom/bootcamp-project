@@ -97,24 +97,25 @@ class DatabaseManager:
     #         print(f"Error fetching users: {e}")
     #         return []
         
-    # def update_transaction(self,tran_id, name, transaction_type, description, paid, date):
-    #     """Update existing transaction Id"""
-    #     try:
-    #         result = self.transaction_collection.update_one(
-    #             {"_id": ObjectId(tran_id)},
-    #             {"$set": {
-    #                 "name": name,
-    #                 "transaction_type": transaction_type,
-    #                 "description": description,
-    #                 "paid": paid,
-    #                 "date": date
-    #             }}
-    #         )
-    #         return result.modified_count
+    def update_transaction(self,tran_id, name, amount, transaction_type, description, paid, date):
+        """Update existing transaction Id"""
+        try:
+            result = self.transaction_collection.update_one(
+                {"_id": ObjectId(tran_id)},
+                {"$set": {
+                    "name": name,
+                    "amount": amount,
+                    "transaction_type": transaction_type,
+                    "description": description,
+                    "paid": paid,
+                    "date": date
+                }}
+            )
+            return result.modified_count
         
-    #     except Exception as e:
-    #         print(f"Error: {e}")
-    #         return None
+        except Exception as e:
+            print(f"Error: {e}")
+            return None
 
     # def update_post(self,user_id, title, content):
     #     """Update existing post based on user ID"""
@@ -228,33 +229,52 @@ def main():
             else:
                 print("Failed to create transaction.")
 
-            # try:
-            #     age = int(input("Enter age: ").strip())
-            #     tran_id = db.create_transaction(name, amount, transaction_type, description, paid, date)
-            #     if tran_id:
-            #         print(f"Transaction created successfully! ID: {tran_id}")
-            #     else:
-            #         print("Failed to create transaction.")
-            # except ValueError:
-            #     print("Invalid age. Please enter a number.")
-
         elif choice == '2':
-            print("Not there yet.")
-            # print("\n--- Update User ---")
+            # print("Not there yet.")
+            print("\n--- Update Transaction ---")
 
-            # user_id = input("Enter user ID to update: ").strip()
-            # name = input("Enter new name: ").strip()
-            # email = input("Enter new email: ").strip()
-            # try:
-            #     age = int(input("Enter new age: ").strip())
+            tran_id = input("Enter transaction ID to update: ").strip()
+            name = input("Enter new name: ").strip()
 
-            #     user_updated = db.update_user(user_id, name, email, age)
-            #     if user_updated:
-            #         print(f"User {user_id} updated successfully!")
-            #     else:
-            #         print("No user found with that ID.")
-            # except ValueError:
-            #     print("Invalid input. Please enter numbers for age.")
+            while True:
+                try:
+                    amount = int(input("Enter new amount: ").strip())
+                    if amount <0:
+                        raise ValueError("Amount must not be negative.")
+                    break
+                except ValueError as e:
+                    print(f"Invalid amount: {e}. Please enter a number.")
+
+            paid = "Yes" if amount > 0 else "No"
+
+            if amount == 0:
+                #skip input for these fields if unpaid
+                transaction_type = ""
+                description = ""
+                date = None
+            else:
+                while True:
+                    transaction_type = input("Enter transaction type(Debit or Credit): ").strip().lower()
+                    if transaction_type in ["debit", "credit"]:
+                        break
+                    print("Transaction type can only be Debit or Credit.")
+                
+                description = input("Enter description: ").strip()
+                
+                while True:
+                    date_str = input("Enter date of transaction: ").strip()
+                    date_str = date_str.replace("/", "-")
+                    try:
+                        date = datetime.strptime(date_str, "%d-%m-%Y")
+                        break
+                    except ValueError:
+                        print("Please enter a valid date.")
+
+            tran_updated = db.update_user(tran_id, name, amount, transaction_type, description, paid, date)
+            if tran_updated:
+                print(f"Transaction {tran_id} updated successfully!")
+            else:
+                print("No transaction found with that ID.")
 
         elif choice == '3':
             # print("Not there yet.")
