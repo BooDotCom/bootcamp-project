@@ -133,26 +133,26 @@ class DatabaseManager:
     #         return None
 
 
-    # def delete_user(self, tran_id):
-    #     """Delete transaction"""
-    #     try:
-    #         #Convert string user_id to ObjectId if it's a valid ObjectId
-    #         if ObjectId.is_valid(tran_id):
-    #             tran_object_id = ObjectId(tran_id)
-    #         else:
-    #             tran_object_id = tran_id
+    def delete_transaction(self, tran_id):
+        """Delete transaction"""
+        try:
+            #Convert string user_id to ObjectId if it's a valid ObjectId
+            if ObjectId.is_valid(tran_id):
+                tran_object_id = ObjectId(tran_id)
+            else:
+                tran_object_id = tran_id
 
-    #         #Delete user's posts first
-    #         # self.posts_collection.delete_many({"user_id": user_object_id})
+            #Delete user's posts first
+            # self.posts_collection.delete_many({"user_id": user_object_id})
 
-    #         #Delete the user
-    #         result = self.transaction_collection.delete_one({"_id": tran_object_id})
+            #Delete the user
+            result = self.transaction_collection.delete_one({"_id": tran_object_id})
 
-    #         return result.deleted_count > 0
+            return result.deleted_count > 0
         
-    #     except Exception as e:
-    #         print(f"Error deleting transaction: {e}")
-    #         return False
+        except Exception as e:
+            print(f"Error deleting transaction: {e}")
+            return False
     
     def close_connection(self):
         """Close the MongoDB connection"""
@@ -266,8 +266,8 @@ def main():
             else:
                 print("No transactions found.")
 
-        elif choice == '4':
-            print("Not there yet.")
+        # elif choice == '4':
+        #     print("Not there yet.")
             # print("\n--- Create New Post ---")
 
             # user_id = input("Enter user ID: ").strip()
@@ -308,19 +308,19 @@ def main():
             # else:
             #     print("No posts found for this user.")
 
-        # elif choice == '7':
-        #     print("\n--- Delete User ---")
+        elif choice == '4':
+            print("\n--- Delete Transaction ---")
 
-        #     user_id = input("Enter user ID to delete: ").strip()
-        #     confirm = input(f"Are you sure you want to delete user {user_id}? (y/n): ").strip().lower()
+            tran_id = input("Enter user ID to delete: ").strip()
+            confirm = input(f"Are you sure you want to delete user {tran_id}? (y/n): ").strip().lower()
 
-        #     if confirm == 'y':
-        #         if db.delete_user(user_id):
-        #             print("User deleted successfully")
-        #         else:
-        #             print("User not found or deletion failed.")
-        #     else:
-        #         print("Deletion cancelled")
+            if confirm == 'y':
+                if db.delete_transaction(tran_id):
+                    print("Transaction deleted successfully")
+                else:
+                    print("Transaction not found or deletion failed.")
+            else:
+                print("Deletion cancelled")
 
         elif choice == '5':
             print("\nClosing database connection...")
