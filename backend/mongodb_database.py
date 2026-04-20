@@ -75,6 +75,40 @@ class DatabaseManager:
             print(f"Error fetching transactions: {e}")
             return []
         
+    def get_paid_by_year(self, year):
+        """Get paid transactions for specific year."""
+        try:
+            start_date = datetime(year,1,1)
+            end_date = datetime(year,12,31)
+
+            trans = list(self.transaction_collection.find({
+                "paid": "Yes",
+                "date":{
+                    "$gte": start_date,
+                    "$lte": end_date
+                }
+            }))
+            for tran in trans:
+                tran['_id'] = str(tran['_id'])
+            return trans
+        except Exception as e:
+            print(f"Error fetching transactions: {e}")
+            return []
+        
+    def get_unpaid(self):
+        """Get unpaid transactions"""
+        try:
+            trans = list(self.transaction_collection.find({
+                "paid": "No"
+            }))
+
+            for tran in trans:
+                tran['_id'] = str(tran['_id'])
+            return trans
+        except Exception as e:
+            print(f"Error fetching transactions: {e}")
+            return []
+
     # def get_user_posts(self, user_id):
     #     """Get posts by user"""
     #     try:
@@ -167,8 +201,10 @@ def display_menu():
     print("1. Create Transaction")
     print("2. Update Transaction")
     print("3. View All Transactions")
-    print("4. Delete Transaction")
-    print("5. Exit")
+    print("4. View Paid Transactions by Year")
+    print("5. View Unpaid Transactions")
+    print("6. Delete Transaction")
+    print("7. Exit")
     print("-"*40)
 
 def main():
@@ -286,32 +322,32 @@ def main():
             else:
                 print("No transactions found.")
 
-        # elif choice == '4':
-        #     print("Not there yet.")
-            # print("\n--- Create New Post ---")
+        elif choice == '4':
+            # print("Not there yet.")
+            print("\n--- Paid Transactions by Year ---")
 
-            # user_id = input("Enter user ID: ").strip()
-            # title = input("Enter post title: ").strip()
-            # content = input("Enter post content: ").strip()
-            # post_id = db.create_post(user_id, title, content)
-            # if post_id:
-            #     print(f"Post created successfully! ID: {post_id}")
-            # else:
-            #     print("Failed to create post")
+            try:
+                year = int(input("Enter year: ").strip())
+                trans = db.get_paid_by_year(year)
+                if trans:
+                    for tran in trans:
+                        print(f"ID: {tran['_id']} | Name: {tran['name']} | Amount: {tran['amount']} | Paid: {tran['paid']} | Date: {tran['date']}")
+                else:
+                    print(f"No paid transactions found for year {year}.")
+            except ValueError:
+                print("Invalid year. Please enter a valid number.")
 
-        # elif choice == '5':
-        #     print("Not there yet")
+        elif choice == '5':
+            # print("Not there yet")
             
-            # print("\n--- Update post ---")
-            # user_id = int(input("Enter user ID to update: ").strip())
-            # title = input("Enter new title: ").strip()
-            # content = input("Enter new content: ").strip()
+            print("\n--- Unpaid Transactions ---")
+            trans = db.get_unpaid()
+            if trans:
+                for tran in trans:
+                    print(f"ID: {tran['_id']} | Name: {tran['name']}| Date: {tran['date']}")
+            else:
+                print("No unpaid transactions found.")
 
-            # post_updated = db.update_post(user_id, title, content)
-            # if post_updated:
-            #     print(f"Post for User {user_id} updated successfully!")
-            # else:
-            #     print("No user found with that ID.")
             
         # elif choice == '6':
             # print("\n--- View User Posts ---")
@@ -328,7 +364,7 @@ def main():
             # else:
             #     print("No posts found for this user.")
 
-        elif choice == '4':
+        elif choice == '6':
             print("\n--- Delete Transaction ---")
 
             tran_id = input("Enter user ID to delete: ").strip()
@@ -342,7 +378,7 @@ def main():
             else:
                 print("Deletion cancelled")
 
-        elif choice == '5':
+        elif choice == '7':
             print("\nClosing database connection...")
             db.close_connection()
             print("\nGoodbye.")
