@@ -11,27 +11,39 @@
 # #put user: /
 # #put post:
 
-# from fastapi import FastAPI, HTTPException, status
-# from contextlib import asynccontextmanager
-# from pydantic import BaseModel, EmailStr
-# from typing import List, Optional
-# from datetime import datetime
-# from bson.objectid import ObjectId
-# from backend.mongodb_database import DatabaseManager
-# from dotenv import load_dotenv
-# # from typing import Optional
-# import os
+from fastapi import FastAPI, HTTPException, status
+from contextlib import asynccontextmanager
+from pydantic import BaseModel, EmailStr
+from typing import List, Optional
+from datetime import datetime
+from bson.objectid import ObjectId
+from backend.mongodb_database import DatabaseManager
+from dotenv import load_dotenv
+from enum import Enum
+from typing import Optional
+import os
 
-# load_dotenv()
+load_dotenv()
 
-# app = FastAPI(title="MongoDB Database API", version ="1.0.0")
+app = FastAPI(title="MongoDB Database API", version ="1.0.0")
 
-# #pydantic models for request/response
+#pydantic models for request/response
 
-# class UserCreate(BaseModel):
-#     name: str
-#     email: EmailStr
-#     age: int
+class TransactionType(str, Enum):
+    debit = "Debit"
+    credit = "Credit"
+
+class Paid(str, Enum):
+    paid = "Paid"
+    not_paid = "Not Paid"
+
+class TransactionCreate(BaseModel):
+    name: str
+    amount: int
+    transaction_type: Optional[TransactionType]
+    description: Optional[str]
+    paid: Optional[Paid]
+    date: datetime
 
 # class UserUpdate(BaseModel):
 #     name: Optional[str]
@@ -68,46 +80,46 @@
 #     content: str
 #     created_at: datetime
 
-# #Initialize database
-# try:
-#     db = DatabaseManager()
-# except Exception as e:
-#     print(f"Failed to connect to MongoDB: {e}")
-#     db = None
+#Initialize database
+try:
+    db = DatabaseManager()
+except Exception as e:
+    print(f"Failed to connect to MongoDB: {e}")
+    db = None
 
-# #event handler
-# @app.on_event("startup")
-# async def startup_event():
-#     if db is None:
-#         raise Exception("Failed to connect to MongoDB")
+#event handler
+@app.on_event("startup")
+async def startup_event():
+    if db is None:
+        raise Exception("Failed to connect to MongoDB")
     
-# @app.on_event("shutdown")
-# async def shutdown_event():
-#     if db:
-#         db.close_connection()
+@app.on_event("shutdown")
+async def shutdown_event():
+    if db:
+        db.close_connection()
 
 
-# @app.get("/")
-# async def root():
-#     return {"message": "MongoDB Database API", "version": "1.0.0"}
+@app.get("/")
+async def root():
+    return {"message": "MongoDB Database API", "version": "1.0.0"}
 
-# @app.post("/users/", response_model=dict, status_code=status.HTTP_201_CREATED)
-# async def create_user(user: UserCreate):
-#     """Create a new user"""
-#     try:
-#         user_id = db.create_user(user.name, user.email, user.age)
-#         if user_id:
-#             return {"message": "User created successfully", "user_id": user_id}
-#         else:
-#             raise HTTPException(
-#                 status_code=status.HTTP_400_BAD_REQUEST,
-#                 detail="Failed to create user. Email might already exist."
-#             )
-#     except Exception as e:
-#         raise HTTPException(
-#                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-#                 detail=f"Internal server error: {str(e)}"
-#         )
+@app.post("/transactions/", response_model=dict, status_code=status.HTTP_201_CREATED)
+async def create_transaction(tran: TransactionCreate):
+    """Create a new transaction"""
+    try:
+        tran_id = db.create_transaction(tran.name, tran.amount, tran.transaction_type, tran.description, tran.paid, tran.date)
+        if tran_id:
+            return {"message": "Transaction created successfully", "tran_id": tran_id}
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Failed to create transaction"
+            )
+    except Exception as e:
+        raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Internal server error: {str(e)}"
+        )
 
 # @app.get("/users/", response_model=List[UserResponse])
 # async def get_all_users():
@@ -406,6 +418,6 @@
 #         )
 
 
-# if __name__ == "__main__":
-#     import uvicorn
-#     uvicorn.run(app, host = "0.0.0.0", port = 8000)
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host = "0.0.0.0", port = 8000)
