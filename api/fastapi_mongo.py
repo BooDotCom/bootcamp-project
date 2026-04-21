@@ -50,12 +50,14 @@ class TransactionCreate(BaseModel):
 #     email: Optional[EmailStr]
 #     age: Optional[int]
 
-# class UserResponse(BaseModel):
-#     id: str
-#     name: str
-#     email: EmailStr
-#     age: int
-#     created_at: datetime
+class TransactionResponse(BaseModel):
+    id: str
+    name: str
+    amount: int
+    transaction_type: str
+    description: str
+    paid: str
+    date: datetime
 
 # class PostCreate(BaseModel):
 #     user_id: str
@@ -132,26 +134,28 @@ async def create_transaction(tran: TransactionCreate):
                 detail=f"Internal server error: {str(e)}"
         )
 
-# @app.get("/users/", response_model=List[UserResponse])
-# async def get_all_users():
-#     """Get all users"""
-#     try:
-#         users = db.get_all_users()
-#         return [
-#             UserResponse(
-#                 id=user['_id'],
-#                 name=user['name'],
-#                 email=user['email'],
-#                 age=user['age'],
-#                 created_at=user['created_at'],
-#             )
-#             for user in users
-#         ]
-#     except Exception as e:
-#         raise HTTPException(
-#                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-#                 detail=f"Internal server error: {str(e)}"
-#         )
+@app.get("/transactions/", response_model=List[TransactionResponse])
+async def get_all_transactions():
+    """Get all transactions"""
+    try:
+        trans = db.get_all_transactions()
+        return [
+            TransactionResponse(
+                id=tran['_id'],
+                name=tran['name'],
+                amount=tran['amount'],
+                transaction_type=tran['transaction_type'],
+                description=tran['description'],
+                paid=tran['paid'],
+                date=tran['date']
+            )
+            for tran in trans
+        ]
+    except Exception as e:
+        raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Internal server error: {str(e)}"
+        )
     
 # # @app.get("/users/{user_id}", response_model=UserResponse)
 # # async def get_user(user_id: str):
@@ -287,40 +291,40 @@ async def create_transaction(tran: TransactionCreate):
 #                 detail=f"Internal server error: {str(e)}"
 #         )
 
-# @app.delete("/users/{user_id}", response_model=dict)
-# async def delete_user(user_id: str):
-#     """Delete user and all their posts"""
-#     try:
+@app.delete("/transactions/{tran_id}", response_model=dict)
+async def delete_transaction(tran_id: str):
+    """Delete transaction"""
+    try:
 
-#         if not ObjectId.is_valid(user_id):
-#             raise HTTPException(
-#                 status_code=status.HTTP_400_BAD_REQUEST,
-#                 detail="Invalid user ID format"
-#             )
+        if not ObjectId.is_valid(tran_id):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid Transaction ID format"
+            )
 
-#         #check if user exists
-#         user = db.users_collection.find_one({"_id": ObjectId(user_id)})
-#         if not user:
-#             raise HTTPException(
-#                 status_code=status.HTTP_404_NOT_FOUND,
-#                 detail="User not found"
-#             )
+        #check if user exists
+        tran = db.transaction_collection.find_one({"_id": ObjectId(tran_id)})
+        if not tran:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Transaction not found"
+            )
 
-#         success = db.delete_user(user_id)
-#         if success:
-#             return {"message": "User deleted successfully"}
-#         else:
-#             raise HTTPException(
-#                 status_code=status.HTTP_400_BAD_REQUEST,
-#                 detail="Failed to delete user"
-#             )
-#     except HTTPException:
-#         raise
-#     except Exception as e:
-#         raise HTTPException(
-#                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-#                 detail=f"Internal server error: {str(e)}"
-#         )
+        success = db.delete_transaction(tran_id)
+        if success:
+            return {"message": "Transaction deleted successfully"}
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Failed to delete transaction"
+            )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Internal server error: {str(e)}"
+        )
 
 # @app.delete("/posts/{post_id}", response_model=dict)
 # async def delete_post(post_id: str):
