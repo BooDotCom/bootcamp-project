@@ -377,18 +377,23 @@ async def update_transaction(tran_id: str, tran_update: TransactionUpdate):
             )
             
         #update transaction
-        if tran.amount == 0:
-            tran.transaction_type = "debit"
-            tran.description = ""
+        if tran_update.amount == 0:
+            tran_update.transaction_type = "debit"
+            tran_update.description = ""
             paid = "No"
-            tran.date = datetime.now()
+            tran_update.date = datetime.now()
         else:
             paid = "Yes"
 
-        result = db.update_transaction(tran_id,tran_update.name, tran_update.amount, tran_update.transaction_type, tran_update.description, paid, tran_update.date)
+        result = db.update_transaction(tran_id, tran_update.name, tran_update.amount, tran_update.transaction_type, tran_update.description, paid, tran_update.date)
 
-        if result.modified_count > 0:
+        if result:
             return {"message": "Transaction updated successfully"}
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Failed to update transaction"
+            )
 
     except HTTPException:
         raise
