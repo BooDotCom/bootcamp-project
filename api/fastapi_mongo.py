@@ -45,10 +45,13 @@ class TransactionCreate(BaseModel):
     # paid: Optional[str]
     date: datetime
 
-# class UserUpdate(BaseModel):
-#     name: Optional[str]
-#     email: Optional[EmailStr]
-#     age: Optional[int]
+class TransactionUpdate(BaseModel):
+    name: str
+    amount: int
+    transaction_type: Optional[str]
+    description: Optional[str]
+    # paid: Optional[str]
+    date: datetime
 
 class TransactionResponse(BaseModel):
     id: str
@@ -354,45 +357,46 @@ async def delete_transaction(tran_id: str):
 #                 detail=f"Internal server error: {str(e)}"
 #         )
     
-# @app.put("/users/{user_id}", response_model=dict)
-# async def update_user(user_id: str, user_update: UserUpdate):
-#     """Update user by ID"""
-#     try:
+@app.put("/transactions/{tran_id}", response_model=dict)
+async def update_transaction(tran_id: str, tran_update: TransactionUpdate):
+    """Update transaction by ID"""
+    try:
 
-#         if not ObjectId.is_valid(user_id):
-#             raise HTTPException(
-#                 status_code=status.HTTP_400_BAD_REQUEST,
-#                 detail="Invalid user ID format"
-#             )
+        if not ObjectId.is_valid(tran_id):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid transaction ID format"
+            )
 
-#         #check if user exists
-#         user = db.users_collection.find_one({"_id": ObjectId(user_id)})
-#         if not user:
-#             raise HTTPException(
-#                 status_code=status.HTTP_404_NOT_FOUND,
-#                 detail="User not found"
-#             )
+        #check if transaction exists
+        tran = db.transaction_collection.find_one({"_id": ObjectId(tran_id)})
+        if not tran:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Transaction not found"
+            )
             
-#         #update user
-#         result = db.users_collection.update_one(
-#             {"_id": ObjectId(user_id)},
-#             {"$set": {
-#                 "name": user_update.name,
-#                 "email": user_update.email,
-#                 "age": user_update.age
-#             }}
-#         )
+        #update transaction
+        if tran.amount == 0:
+            tran.transaction_type = "debit"
+            tran.description = ""
+            paid = "No"
+            tran.date = datetime.now()
+        else:
+            paid = "Yes"
 
-#         if result.modified_count > 0:
-#             return {"message": "User updated successfully"}
+        result = db.update_transaction(tran_id,tran_update.name, tran_update.amount, tran_update.transaction_type, tran_update.description, paid, tran_update.date)
 
-#     except HTTPException:
-#         raise
-#     except Exception as e:
-#         raise HTTPException(
-#                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-#                 detail=f"Internal server error: {str(e)}"
-#         )
+        if result.modified_count > 0:
+            return {"message": "Transaction updated successfully"}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Internal server error: {str(e)}"
+        )
     
 # @app.put("/posts/{post_id}", response_model=dict)
 # async def update_post(post_id: str, title: str, content:str):#post: PostUpdate):
