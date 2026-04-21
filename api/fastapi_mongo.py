@@ -108,6 +108,7 @@ async def create_transaction(tran: TransactionCreate):
     """Create a new transaction"""
     try:
 
+        #Check if amount = 0(not paid) or not(paid)
         if tran.amount == 0:
             tran.transaction_type = "debit"
             tran.description = ""
