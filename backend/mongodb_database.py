@@ -81,7 +81,8 @@ class DatabaseManager:
             start_date = date(year,1,1)
             end_date = date(year,12,31)
 
-            if paid == "paid":
+            trans = []
+            if paid in ["paid", "yes"]:
                 trans = list(self.transaction_collection.find({
                     "paid": "Yes",
                     "date":{
@@ -89,7 +90,7 @@ class DatabaseManager:
                         "$lte": end_date
                     }
                 }))
-            elif paid == "unpaid":
+            elif paid in ["unpaid", "no"]:
                 trans = list(self.transaction_collection.find({
                     "paid": "No",
                     "date":{

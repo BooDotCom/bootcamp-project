@@ -54,13 +54,13 @@ class TransactionUpdate(BaseModel):
     date: datetime
 
 class TransactionResponse(BaseModel):
-    id: str
-    name: str
-    amount: int
-    transaction_type: str
-    description: str
-    paid: str
-    date: datetime
+    id: Optional[str]
+    name: Optional[str]
+    amount: Optional[int]
+    transaction_type: Optional[str]
+    description: Optional[str]
+    paid: Optional[str]
+    date: Optional[datetime]
 
 # class PostCreate(BaseModel):
 #     user_id: str
@@ -160,6 +160,48 @@ async def get_all_transactions():
                 detail=f"Internal server error: {str(e)}"
         )
     
+@app.get("/transactions/by-year/", response_model=List[TransactionResponse])
+async def get_transactions_by_year(year: int,paid: str):
+    """Get transactions by year"""
+    try:
+
+        paid = paid.lower()
+
+        if paid in ["yes", "paid"]:
+            trans = db.get_transaction_by_year(year, paid)
+            return [
+                TransactionResponse(
+                    id=tran['_id'],
+                    name=tran['name'],
+                    amount=tran['amount'],
+                    description=tran['description'],
+                    date=tran['date']
+                )
+                for tran in trans
+            ]
+        elif paid in ["no", "unpaid"]:
+            trans = db.get_transaction_by_year(year, paid)
+            return [
+                TransactionResponse(
+                    id=tran['_id'],
+                    name=tran['name'],
+                    date=tran['date']
+                )
+                for tran in trans
+            ]
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="paid must be Yes or No"
+            )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Internal server error: {str(e)}"
+        )
+
 # # @app.get("/users/{user_id}", response_model=UserResponse)
 # # async def get_user(user_id: str):
 # #     """Get specific user by ID"""
