@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-from datetime import datetime
+from datetime import date
 from bson.objectid import ObjectId
 from dotenv import load_dotenv
 
@@ -78,8 +78,8 @@ class DatabaseManager:
     def get_transaction_by_year(self, year, paid):
         """Get transactions for specific year."""
         try:
-            start_date = datetime(year,1,1)
-            end_date = datetime(year,12,31)
+            start_date = date(year,1,1)
+            end_date = date(year,12,31)
 
             if paid == "paid":
                 trans = list(self.transaction_collection.find({
@@ -228,13 +228,13 @@ def main():
                 except ValueError as e:
                     print(f"Invalid amount: {e}. Please enter a number.")
 
-            paid = "Yes" if amount > 0 else "No"
-
             if amount == 0:
                 #skip input for these fields if unpaid
                 transaction_type = "debit"
                 description = ""
+                paid = "No"
             else:
+                paid = "Yes"
                 while True:
                     transaction_type = input("Enter transaction type(Debit or Credit): ").strip().lower()
                     if transaction_type in ["debit", "credit"]:
@@ -247,7 +247,7 @@ def main():
                 date_str = input("Enter date of transaction: ").strip()
                 date_str = date_str.replace("/", "-")
                 try:
-                    date = datetime.strptime(date_str, "%d-%m-%Y")
+                    date = date.strptime(date_str, "%d-%m-%Y")
                     break
                 except ValueError:
                     print("Please enter a valid date.")
@@ -293,7 +293,7 @@ def main():
                 date_str = input("Enter date of transaction: ").strip()
                 date_str = date_str.replace("/", "-")
                 try:
-                    date = datetime.strptime(date_str, "%d-%m-%Y")
+                    date = date.strptime(date_str, "%d-%m-%Y")
                     break
                 except ValueError:
                     print("Please enter a valid date.")

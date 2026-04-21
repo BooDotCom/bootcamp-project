@@ -29,20 +29,20 @@ app = FastAPI(title="MongoDB Database API", version ="1.0.0")
 
 #pydantic models for request/response
 
-class TransactionType(str, Enum):
-    debit = "Debit"
-    credit = "Credit"
+# class TransactionType(str, Enum):
+#     debit = "Debit"
+#     credit = "Credit"
 
-class Paid(str, Enum):
-    paid = "Paid"
-    not_paid = "Not Paid"
+# class Paid(str, Enum):
+#     paid = "Paid"
+#     not_paid = "Not Paid"
 
 class TransactionCreate(BaseModel):
     name: str
     amount: int
-    transaction_type: Optional[TransactionType]
+    transaction_type: Optional[str]
     description: Optional[str]
-    paid: Optional[Paid]
+    # paid: Optional[str]
     date: datetime
 
 # class UserUpdate(BaseModel):
@@ -107,7 +107,17 @@ async def root():
 async def create_transaction(tran: TransactionCreate):
     """Create a new transaction"""
     try:
-        tran_id = db.create_transaction(tran.name, tran.amount, tran.transaction_type, tran.description, tran.paid, tran.date)
+
+        if tran.amount == 0:
+            tran.transaction_type = "debit"
+            tran.description = ""
+            paid = "No"
+            tran.date = datetime.now()
+        else:
+            paid = "Yes"
+
+        tran_id = db.create_transaction(tran.name, tran.amount, tran.transaction_type, tran.description, paid, tran.date)
+        
         if tran_id:
             return {"message": "Transaction created successfully", "tran_id": tran_id}
         else:
