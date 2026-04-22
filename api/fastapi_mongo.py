@@ -173,7 +173,7 @@ async def get_all_transactions():
                 detail=f"Internal server error: {str(e)}"
         )
     
-@app.get("/transactions/by-year/paid", response_model=List[TransactionResponsePaid])
+@app.get("/transactions/by-year/paid/", response_model=List[TransactionResponsePaid])
 async def get_transactions_by_year(year: int,paid: str):
     """Get paid transactions by year"""
     try:
@@ -197,6 +197,36 @@ async def get_transactions_by_year(year: int,paid: str):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="paid must be Yes or Paid."
+            )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Internal server error: {str(e)}"
+        )
+
+@app.get("/transactions/by-year/unpaid/", response_model=List[TransactionResponseUnpaid])
+async def get_transactions_by_year(year: int,paid: str):
+    """Get unpaid transactions by year"""
+    try:
+
+        paid = paid.lower()
+
+        if paid in ["no", "unpaid"]:
+            trans = db.get_transaction_by_year(year, paid)
+            return [
+                TransactionResponseUnpaid(
+                    id=tran['_id'],
+                    name=tran['name'],
+                    date=tran['date']
+                )
+                for tran in trans
+            ]
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="paid must be No or Unpaid."
             )
     except HTTPException:
         raise
