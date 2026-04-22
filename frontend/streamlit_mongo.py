@@ -48,24 +48,24 @@ def get_all_transactions():
     except Exception as e:
         return [], False
     
-# def update_user(user_id, name, email, age):
-#     """Update a user via API"""
-#     try:
-#         response = requests.put(
-#             f"{API_BASE_URL}/users/{user_id}",
-#             json={"name": name, "email": email, "age": age}
-#         )
-#         return response.json(), response.status_code == 200
-#     except Exception as e:
-#         return {"error": str(e)}, False
+def update_transaction(tran_id, name, amount, transaction_type, description, date):
+    """Update a transaction via API"""
+    try:
+        response = requests.put(
+            f"{API_BASE_URL}/transactions/{tran_id}",
+            json={"name": name, "amount": amount, "transaction_type": transaction_type, "description": description, "date": date.isoformat()}
+        )
+        return response.json(), response.status_code == 200
+    except Exception as e:
+        return {"error": str(e)}, False
     
-# def delete_user(user_id):
-#     """Delete a user via API"""
-#     try:
-#         response = requests.delete(f"{API_BASE_URL}/users/{user_id}")
-#         return response.json(), response.status_code == 200
-#     except Exception as e:
-#         return{"error": str(e)}, False
+def delete_transaction(tran_id):
+    """Delete a transaction via API"""
+    try:
+        response = requests.delete(f"{API_BASE_URL}/transactions/{tran_id}")
+        return response.json(), response.status_code == 200
+    except Exception as e:
+        return{"error": str(e)}, False
     
 # def create_post(user_id, title, content):
 #     """Create a new user via API"""
@@ -170,7 +170,7 @@ def transactions_page():
             #Convert to DataFrame for better display
             df = pd.DataFrame(trans)
             try:
-                df['date'] = pd.to_datetime(df['date'], format='ISO8601').dt.strftime('%Y-%m-%d %H:%M:%S')
+                df['date'] = pd.to_datetime(df['date'], format='ISO8601').dt.strftime('%d-%m-%Y %H:%M:%S')
             except Exception as e:
                 st.warning(f"Date formatting issue: {e}")
 
@@ -186,47 +186,49 @@ def transactions_page():
         else:
             st.info("No transactions found")
 
-#     with tab3:
-#         st.subheader("Manage Users")
-#         users, success = get_all_users()
+    with tab3:
+        st.subheader("Manage Transactions")
+        trans, success = get_all_transactions()
 
-#         if success and users:
-#             #Select user to merge
-#             user_options = {f"{user['name']} ({user['email']})": user['id'] for user in users}
-#             selected_user_display = st.selectbox("Select a user to manage", list(user_options.keys()))
+        if success and trans:
+            #Select user to merge
+            tran_options = {f"{tran['name']} ({tran['date']})": tran['id'] for tran in trans}
+            selected_tran_display = st.selectbox("Select a transaction to manage", list(tran_options.keys()))
 
-#             if selected_user_display:
-#                 selected_user_id = user_options[selected_user_display]
-#                 selected_user = next(user for user in users if user['id'] == selected_user_id)
+            if selected_tran_display:
+                selected_tran_id = tran_options[selected_tran_display]
+                selected_tran = next(tran for tran in trans if tran['id'] == selected_tran_id)
 
-#                 col1, col2 = st.columns(2)
+                col1, col2 = st.columns(2)
 
-#                 with col1:
-#                     st.write("**Update User**")
-#                     with st.form("update_user_form"):
-#                         new_name = st.text_input("Name", value=selected_user['name'])
-#                         new_email = st.text_input("Email", value=selected_user['email'])
-#                         new_age = st.number_input("Age", min_value=1, max_value=120, value=selected_user['age'])
+                with col1:
+                    st.write("**Update Transaction**")
+                    with st.form("update_transaction_form"):
+                        new_name = st.text_input("Name", value=selected_tran['name'])
+                        new_amount = st.number_input("Amount", min_value=0, value=selected_tran['amount'])
+                        new_tran_type = st.text_input("Transaction Type", value=selected_tran['transaction_type'])
+                        new_desc = st.text_input("Description", value=selected_tran['description'])
+                        new_date = st.date_input("Date", value=selected_tran['date'])
 
-#                         if st.form_submit_button("Update User", type = "primary"):
-#                             result, success = update_user(selected_user_id, new_name, new_email, new_age)
-#                             if success:
-#                                 st.success("User updated successfully")
-#                                 st.rerun()
-#                             else:
-#                                 st.error(f"Error: {result.get('detail', 'Unknown error')}")
+                        if st.form_submit_button("Update Transaction", type = "primary"):
+                            result, success = update_transaction(selected_tran_id, new_name, new_amount, new_tran_type, new_desc, new_date)
+                            if success:
+                                st.success("Transaction updated successfully")
+                                st.rerun()
+                            else:
+                                st.error(f"Error: {result.get('detail', 'Unknown error')}")
 
-#                 with col2:
-#                     st.write("**Delete User**")
-#                     st.warning("⚠️ WARNING This will delete the user and all their posts!")
+                with col2:
+                    st.write("**Delete Transaction**")
+                    st.warning("⚠️ WARNING This will delete the transaction!")
                     
-#                     if st.button("Delete User", type = "secondary"):
-#                         result, success = delete_user(selected_user_id)
-#                         if success:
-#                             st.success("User deleted successfully")
-#                             st.rerun()
-#                         else:
-#                             st.error(f"Error: {result.get('detail', 'Unknown error')}")
+                    if st.button("Delete Transaction", type = "secondary"):
+                        result, success = delete_transaction(selected_tran_id)
+                        if success:
+                            st.success("Transaction deleted successfully")
+                            st.rerun()
+                        else:
+                            st.error(f"Error: {result.get('detail', 'Unknown error')}")
 
 # def dashboard_page():
 #     st.header("☰ Dashboard")
