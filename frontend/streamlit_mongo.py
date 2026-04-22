@@ -2,41 +2,41 @@
 # #1: uvicorn fastapi_mongo:app
 # #2: streamlit run streamlit_mongo.py
 
-# import streamlit as st
-# import requests
-# import pandas as pd
-# from datetime import datetime
-# import json
+import streamlit as st
+import requests
+import pandas as pd
+from datetime import datetime, date, time
+import json
 
-# #Configure the page
-# st.set_page_config(
-#     page_title="MongoDB Database Manager",
-#     page_icon="🗄️",
-#     layout="wide",
-#     initial_sidebar_state="expanded"
-# )
+#Configure the page
+st.set_page_config(
+    page_title="Raya Fund Tracker",
+    page_icon="🔎",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
 # #API base URL (make sure your fastapi server is running on this port)
-# API_BASE_URL = "http://localhost:8000"
+API_BASE_URL = "http://localhost:8000"
 
-# def check_api_connection():
-#     """Check if the FastAPI server is running"""
-#     try:
-#         response = requests.get(f"{API_BASE_URL}/")
-#         return response.status_code == 200
-#     except:
-#         return False
+def check_api_connection():
+    """Check if the FastAPI server is running"""
+    try:
+        response = requests.get(f"{API_BASE_URL}/")
+        return response.status_code == 200
+    except:
+        return False
     
-# def create_user(name, email, age):
-#     """Create a new user via API"""
-#     try:
-#         response = requests.post(
-#             f"{API_BASE_URL}/users/",
-#             json={"name": name, "email": email, "age": age}
-#         )
-#         return response.json(), response.status_code == 201
-#     except Exception as e:
-#         return{"error": str(e)}, False
+def create_transaction(name, amount, transaction_type, description, date):
+    """Create a new transaction via API"""
+    try:
+        response = requests.post(
+            f"{API_BASE_URL}/transactions/",
+            json={"name": name, "amount": amount, "transaction_type": transaction_type, "description": description, "date": date}
+        )
+        return response.json(), response.status_code == 201
+    except Exception as e:
+        return{"error": str(e)}, False
     
 # def get_all_users():
 #     """Get all users via API"""
@@ -106,58 +106,60 @@
 #     except Exception as e:
 #         return{"error": str(e)}, False
 
-# def main():
-#     st.title("🗄️ MongoDB Database Manager")
-#     st.markdown("---")
+def main():
+    st.title("🔎 Raya Fund Tracker")
+    st.markdown("---")
 
-#     #check API connection
-#     if not check_api_connection():
-#         st.error("Cannot connect to FastAPI server. Please make sure it's running on http://localhost:8000")
-#         st.info("Run 'python fastapi_mongo.py' to start the server")
-#         return
+    #check API connection
+    if not check_api_connection():
+        st.error("Cannot connect to FastAPI server. Please make sure it's running on http://localhost:8000")
+        st.info("Run 'python fastapi_mongo.py' to start the server")
+        return
     
-#     #Sidebar for navigation
-#     st.sidebar.title("Navigation")
-#     page = st.sidebar.selectbox(
-#         "Choose a page",
-#         ["👥 Users", "📝 Posts", "☰ Dashboard"]
-#     )
+    #Sidebar for navigation
+    st.sidebar.title("Navigation")
+    page = st.sidebar.selectbox(
+        "Choose a page",
+        ["👥 Transactions", "☰ Dashboard"]
+    )
 
-#     if page == "👥 Users":
-#         users_page()
-#     elif page == "📝 Posts":
-#         posts_page()
+    if page == "👥 Transactions":
+        transactions_page()
 #     elif page == "☰ Dashboard":
 #         dashboard_page()
 
-# def users_page():
-#     st.header("👥 User Management")
+def transactions_page():
+    st.header("👥 Transaction Management")
 
-#     #Create tabs for different user operations
-#     tab1, tab2, tab3 = st.tabs(["Create User", "View Users", "Manage Users"])
+    #Create tabs for different transaction operations
+    tab1, tab2, tab3 = st.tabs(["Create Transaction", "View Transactions", "Manage Transactions"])
 
-#     with tab1:
-#         st.subheader("Create New User")
-#         with st.form("create_user_form"):
-#             col1, col2 = st.columns(2)
-#             with col1:
-#                 name = st.text_input("Name", placeholder="Enter your name")
-#                 email = st.text_input("Email", placeholder="Enter email address")
-#             with col2:
-#                 age = st.number_input("Age", min_value=1, max_value=120, value=25)
+    with tab1:
+        st.subheader("Create New Transaction")
+        with st.form("create_transaction_form"):
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                name = st.text_input("Name", placeholder="Enter your name")
+                amount = st.number_input("Amount", min_value=0, value=0)
+            with col2:
+                transaction_type = st.selectbox("Transaction Type", ["Debit", "Credit"], placeholder="Select transaction type")
+                date = st.date_input("Select date", value=date.today())
+            with col3:
+                description = st.text_input("Description", placeholder="Enter description")
 
-#             submitted = st.form_submit_button("Create User", type="primary")
+            submitted = st.form_submit_button("Create Tranasction", type="primary")
 
-#             if submitted:
-#                 if name and email:
-#                     result, success = create_user(name, email, age)
-#                     if success:
-#                         st.success(f"User created successfully! ID: {result.get('user_id')}")
-#                         st.rerun()
-#                     else:
-#                         st.error(f"Error: {result.get('detail', 'Unknown error')}")
-#                 else:
-#                     st.error("Please fill in all fields.")
+            if submitted:
+                if name:
+                    date_obj = datetime.combine(date,time.min)
+                    result, success = create_transaction(name, amount, transaction_type, description, date_obj)
+                    if success:
+                        st.success(f"Transaction created successfully! ID: {result.get('tran_id')}")
+                        st.rerun()
+                    else:
+                        st.error(f"Error: {result.get('detail', 'Unknown error')}")
+                else:
+                    st.error("Please fill in all fields.")
 
 #     with tab2:
 #         st.subheader("All Users")
@@ -222,91 +224,6 @@
 #                         else:
 #                             st.error(f"Error: {result.get('detail', 'Unknown error')}")
 
-# def posts_page():
-#     st.header("📝 Post Management")
-
-#     #Create tabs for different post operations
-#     tab1, tab2, tab3 = st.tabs(["Create Post", "View Posts", "Manage Posts"])
-
-#     with tab1:
-#         st.subheader("Create New Post")
-
-#         #get users from dropdown
-#         users, users_success = get_all_users()
-#         if users_success and users:
-
-#             with st.form("create_post_form"):
-#                 #User selection
-#                 user_options = {f"{user['name']} ({user['email']})": user['id'] for user in users}
-#                 selected_user_display = st.selectbox("Select User", list(user_options.keys()))
-
-#                 title = st.text_input("Post Title", placeholder="Enter post title")
-#                 content = st.text_area("Post Content", placeholder="Enter post content", height =150)
-
-#                 submitted = st.form_submit_button("Create Post", type="primary")
-
-#                 if submitted:
-#                     if selected_user_display and title and content:
-#                         user_id = user_options[selected_user_display]
-                        
-#                         result, success = create_post(user_id, title, content)
-#                         if success:
-#                             st.success(f"Post created successfully! ID: {result.get('post_id')}")
-#                             st.rerun()
-#                         else:
-#                             st.error(f"Error: {result.get('detail', 'Unknown error')}")
-#                     else:
-#                         st.error("Please fill in all fields.")
-        
-#     with tab2:
-#         st.subheader("All Posts")
-#         posts, success = get_all_posts()
-
-#         if success and posts:
-        
-#             for post in posts:
-#                 with st.expander(f"📝 {post['title']} (ID: {post['id'][:8]})"):
-#                     col1, col2 = st.columns([3,1])
-#                     with col1:
-#                         st.write(f"**Content: ** {post['content']}")
-#                         st.write(f"**Created: ** {pd.to_datetime(post['created_at']).strftime('%Y-%m-%d %H:%M:%S')}")
-#                     with col2:
-#                         st.write(f"**User ID: ** {post['user_id'][:8]}...")
-#                         if st.button(f"Delete", key=f"delete_user_{post['id']}", type="secondary"):
-#                             result, success = delete_post(post['id'])
-#                             if success:
-#                                 st.success("Post deleted.")
-#                                 st.rerun()
-#                             else:
-#                                 st.error("Failed to delete post")
-
-#             #Show user count
-#             st.info(f"Total posts: {len(posts)}")
-#         else:
-#             st.info("No posts found")
-
-#     with tab3:
-#         st.subheader("Posts by User")
-
-#         users, users_success = get_all_users()
-
-#         if users_success and users:
-#             user_options = {f"{user['name']} ({user['email']})": user['id'] for user in users}
-#             selected_user_display = st.selectbox("Select User to view posts", list(user_options.keys()))
-
-#             if selected_user_display:
-#                 user_id = user_options[selected_user_display]
-#                 posts, success = get_user_posts(user_id)
-
-#                 if success and posts:
-#                     st.write(f"**Posts by {selected_user_display}: **")
-#                     for post in posts:
-#                         with st.expander(f"📝 {post['title']}"):
-#                             st.write(f"**Content: ** {post['content']}")
-#                             st.write(f"**Created: ** {pd.to_datetime(post['created_at']).strftime('%Y-%m-%d %H:%M:%S')}")
-#                 else:
-#                     st.info("No posts found for this user")
-
 # def dashboard_page():
 #     st.header("☰ Dashboard")
 
@@ -361,5 +278,5 @@
 #     else:
 #         st.error("Failed to load dashboard data")
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()
