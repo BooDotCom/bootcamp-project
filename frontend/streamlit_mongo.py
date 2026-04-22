@@ -32,21 +32,21 @@ def create_transaction(name, amount, transaction_type, description, date):
     try:
         response = requests.post(
             f"{API_BASE_URL}/transactions/",
-            json={"name": name, "amount": amount, "transaction_type": transaction_type, "description": description, "date": date}
+            json={"name": name, "amount": amount, "transaction_type": transaction_type, "description": description, "date": date.isoformat()}
         )
         return response.json(), response.status_code == 201
     except Exception as e:
         return{"error": str(e)}, False
     
-# def get_all_users():
-#     """Get all users via API"""
-#     try:
-#         response = requests.get(f"{API_BASE_URL}/users/")
-#         if response.status_code == 200:
-#             return response.json(), True
-#         return [], False
-#     except Exception as e:
-#         return [], False
+def get_all_transactions():
+    """Get all transactions via API"""
+    try:
+        response = requests.get(f"{API_BASE_URL}/transactions/")
+        if response.status_code == 200:
+            return response.json(), True
+        return [], False
+    except Exception as e:
+        return [], False
     
 # def update_user(user_id, name, email, age):
 #     """Update a user via API"""
@@ -137,29 +137,30 @@ def transactions_page():
     with tab1:
         st.subheader("Create New Transaction")
         with st.form("create_transaction_form"):
-            col1, col2, col3 = st.columns(3)
+            col1, col2 = st.columns(2)
             with col1:
                 name = st.text_input("Name", placeholder="Enter your name")
                 amount = st.number_input("Amount", min_value=0, value=0)
+                date = st.date_input("Select date")
             with col2:
                 transaction_type = st.selectbox("Transaction Type", ["Debit", "Credit"], placeholder="Select transaction type")
-                date = st.date_input("Select date", value=date.today())
-            with col3:
                 description = st.text_input("Description", placeholder="Enter description")
-
-            submitted = st.form_submit_button("Create Tranasction", type="primary")
+            
+            submitted = st.form_submit_button("Create Transaction", type="primary")
 
             if submitted:
                 if name:
+                    # paid = "Yes" if amount > 0 else "No"
                     date_obj = datetime.combine(date,time.min)
                     result, success = create_transaction(name, amount, transaction_type, description, date_obj)
+                    # st.json(result)
                     if success:
                         st.success(f"Transaction created successfully! ID: {result.get('tran_id')}")
                         st.rerun()
                     else:
                         st.error(f"Error: {result.get('detail', 'Unknown error')}")
                 else:
-                    st.error("Please fill in all fields.")
+                    st.error("Please fill in name.")
 
 #     with tab2:
 #         st.subheader("All Users")
