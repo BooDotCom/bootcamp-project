@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-from datetime import date
+from datetime import datetime
 from bson.objectid import ObjectId
 from dotenv import load_dotenv
 
@@ -78,8 +78,8 @@ class DatabaseManager:
     def get_transaction_by_year(self, year, paid):
         """Get transactions for specific year."""
         try:
-            start_date = date(year,1,1)
-            end_date = date(year,12,31)
+            start_date = datetime(year,1,1)
+            end_date = datetime(year,12,31)
 
             trans = []
             if paid in ["paid", "yes"]:

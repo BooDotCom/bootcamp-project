@@ -54,13 +54,26 @@ class TransactionUpdate(BaseModel):
     date: datetime
 
 class TransactionResponse(BaseModel):
-    id: Optional[str]
-    name: Optional[str]
-    amount: Optional[int]
-    transaction_type: Optional[str]
-    description: Optional[str]
-    paid: Optional[str]
-    date: Optional[datetime]
+    id: str
+    name: str
+    amount: int
+    transaction_type: str
+    description: str
+    paid: str
+    date: datetime
+
+class TransactionResponsePaid(BaseModel):
+    id: str
+    name: str
+    amount: int
+    transaction_type: str
+    description: str
+    date: datetime
+
+class TransactionResponseUnpaid(BaseModel):
+    id: str
+    name: str
+    date: datetime
 
 # class PostCreate(BaseModel):
 #     user_id: str
@@ -160,9 +173,9 @@ async def get_all_transactions():
                 detail=f"Internal server error: {str(e)}"
         )
     
-@app.get("/transactions/by-year/", response_model=List[TransactionResponse])
+@app.get("/transactions/by-year/paid", response_model=List[TransactionResponsePaid])
 async def get_transactions_by_year(year: int,paid: str):
-    """Get transactions by year"""
+    """Get paid transactions by year"""
     try:
 
         paid = paid.lower()
@@ -170,21 +183,12 @@ async def get_transactions_by_year(year: int,paid: str):
         if paid in ["yes", "paid"]:
             trans = db.get_transaction_by_year(year, paid)
             return [
-                TransactionResponse(
+                TransactionResponsePaid(
                     id=tran['_id'],
                     name=tran['name'],
                     amount=tran['amount'],
+                    transaction_type = tran['transaction_type'],
                     description=tran['description'],
-                    date=tran['date']
-                )
-                for tran in trans
-            ]
-        elif paid in ["no", "unpaid"]:
-            trans = db.get_transaction_by_year(year, paid)
-            return [
-                TransactionResponse(
-                    id=tran['_id'],
-                    name=tran['name'],
                     date=tran['date']
                 )
                 for tran in trans
@@ -192,7 +196,7 @@ async def get_transactions_by_year(year: int,paid: str):
         else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="paid must be Yes or No"
+                detail="paid must be Yes or Paid."
             )
     except HTTPException:
         raise
