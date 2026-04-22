@@ -162,26 +162,29 @@ def transactions_page():
                 else:
                     st.error("Please fill in name.")
 
-#     with tab2:
-#         st.subheader("All Users")
-#         users, success = get_all_users()
+    with tab2:
+        st.subheader("All Transactions")
+        trans, success = get_all_transactions()
 
-#         if success and users:
-#             #Convert to DataFrame for better display
-#             df = pd.DataFrame(users)
-#             df['created_at'] = pd.to_datetime(df['created_at']).dt.strftime('%Y-%m-%d %H:%M:%S')
+        if success and trans:
+            #Convert to DataFrame for better display
+            df = pd.DataFrame(trans)
+            try:
+                df['date'] = pd.to_datetime(df['date'], format='ISO8601').dt.strftime('%Y-%m-%d %H:%M:%S')
+            except Exception as e:
+                st.warning(f"Date formatting issue: {e}")
 
-#             #Display users in a table
-#             st.dataframe(
-#                 df[['id', 'name', 'email', 'age', 'created_at']],
-#                 use_container_width=True,
-#                 hide_index=True
-#             )
+            #Display users in a table
+            st.dataframe(
+                df[['id', 'name', 'amount', 'transaction_type', 'description', 'paid', 'date']],
+                use_container_width=True,
+                hide_index=True
+            )
 
-#             #Show user count
-#             st.info(f"Total users: {len(users)}")
-#         else:
-#             st.info("No users found")
+            #Show user count
+            # st.info(f"Total users: {len(users)}")
+        else:
+            st.info("No transactions found")
 
 #     with tab3:
 #         st.subheader("Manage Users")
