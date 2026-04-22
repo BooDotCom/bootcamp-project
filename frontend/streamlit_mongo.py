@@ -48,6 +48,20 @@ def get_all_transactions():
     except Exception as e:
         return [], False
     
+def get_transactions_by_year(year):
+    """Get transactions by year via API"""
+    try:
+        response = requests.get(
+            f"{API_BASE_URL}/transactions/by-year/",
+            json={"year": year}
+            )
+        
+        if response.status_code == 200:
+            return response.json(), True
+        return [], False
+    except Exception as e:
+        return [], False
+
 def update_transaction(tran_id, name, amount, transaction_type, description, date):
     """Update a transaction via API"""
     try:
@@ -125,8 +139,8 @@ def main():
 
     if page == "👥 Transactions":
         transactions_page()
-#     elif page == "☰ Dashboard":
-#         dashboard_page()
+    elif page == "📅 Annual":
+        annual_page()
 
 def transactions_page():
     st.header("👥 Transaction Management")
@@ -230,12 +244,22 @@ def transactions_page():
                         else:
                             st.error(f"Error: {result.get('detail', 'Unknown error')}")
 
-# def dashboard_page():
-#     st.header("☰ Dashboard")
+def annual_page():
+    st.header("📅 Annual Transactions")
+
+    with st.form("get_annual_form"):
+        col1, col2 = st.columns(2)
+        with col1:
+            year = st.number_input("Year", min_value=2000, max_value=2050, value=2026)
+        with col2:
+            paid = st.selectbox("Pay Status", ["All", "Paid", "Unpaid"], placeholder="Select pay status")
+
+        submit = st.form_submit_button("View Transactions", type="primary")
+            
 
 #     #Get data for dashboard
-#     users, users_success = get_all_users()
-#     posts, posts_success = get_all_posts()
+#     # users, users_success = get_all_users()
+#     # posts, posts_success = get_all_posts()
 
 #     if users_success and posts_success:
 #         #Metrics
