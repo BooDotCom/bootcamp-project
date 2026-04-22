@@ -98,6 +98,13 @@ class DatabaseManager:
                         "$lte": end_date
                     }
                 }))
+            else:
+                trans = list(self.transaction_collection.find({
+                    "date":{
+                        "$gte": start_date,
+                        "$lte": end_date
+                    }
+                }))
             for tran in trans:
                 tran['_id'] = str(tran['_id'])
             return trans
