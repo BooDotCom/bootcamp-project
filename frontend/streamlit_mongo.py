@@ -48,13 +48,25 @@ def get_all_transactions():
     except Exception as e:
         return [], False
     
-def get_transactions_by_year(year):
+def get_transactions_by_year(year, paid):
     """Get transactions by year via API"""
     try:
-        response = requests.get(
-            f"{API_BASE_URL}/transactions/by-year/",
-            json={"year": year}
-            )
+        
+        if paid == "Paid":
+            response = requests.get(
+                f"{API_BASE_URL}/transactions/by-year/paid/",
+                json={"year": year, "paid": paid}
+                )
+        elif paid == "Unpaid":
+            response = requests.get(
+                f"{API_BASE_URL}/transactions/by-year/unpaid/",
+                json={"year": year, "paid": paid}
+                )
+        elif paid == "All":
+            response = requests.get(
+                f"{API_BASE_URL}/transactions/by-year/",
+                json={"year": year}
+                )
         
         if response.status_code == 200:
             return response.json(), True
@@ -255,6 +267,48 @@ def annual_page():
             paid = st.selectbox("Pay Status", ["All", "Paid", "Unpaid"], placeholder="Select pay status")
 
         submit = st.form_submit_button("View Transactions", type="primary")
+
+    st.markdown('---')
+
+    if submit:
+        if year:
+            trans, success = get_transactions_by_year(year, paid)
+
+            if success and trans:
+                #Convert to DataFrame for better display
+                df = pd.DataFrame(trans)
+                try:
+                    df['date'] = pd.to_datetime(df['date'], format='ISO8601').dt.strftime('%d-%m')
+                except Exception as e:
+                    st.warning(f"Date formatting issue: {e}")
+
+                #Display users in a table
+                if paid == "Paid":
+                    st.dataframe(
+                        df[['id', 'name', 'amount', 'transaction_type', 'description', 'date']],
+                        use_container_width=True,
+                        hide_index=True
+                    )
+                if paid == "Unpaid":
+                    st.dataframe(
+                        df[['id', 'name', 'date']],
+                        use_container_width=True,
+                        hide_index=True
+                    )
+                if paid == "All":
+                    st.dataframe(
+                        df[['id', 'name', 'amount', 'transaction_type', 'description', 'paid', 'date']],
+                        use_container_width=True,
+                        hide_index=True
+                    )
+
+                #Show user count
+                # st.info(f"Total users: {len(users)}")
+            else:
+                st.info("No transactions found")
+        else:
+            st.error("Please fill in year.")
+            
             
 
 #     #Get data for dashboard
