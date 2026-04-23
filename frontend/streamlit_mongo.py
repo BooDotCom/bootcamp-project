@@ -176,7 +176,7 @@ def transactions_page():
 
         if success and trans:
             #Select user to merge
-            tran_options = {f"{tran['name']} ({tran['date']})": tran['id'] for tran in trans}
+            tran_options = {f"{tran['name']} ({datetime.fromisoformat(tran['date']).date()})": tran['id'] for tran in trans}
             selected_tran_display = st.selectbox("Select a transaction to manage", list(tran_options.keys()))
 
             if selected_tran_display:
