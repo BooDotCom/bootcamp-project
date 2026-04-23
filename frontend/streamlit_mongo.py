@@ -54,25 +54,24 @@ def get_transactions_by_year(year, paid):
         
         if paid == "Paid":
             response = requests.get(
-                f"{API_BASE_URL}/transactions/by-year/paid/",
-                json={"year": year, "paid": paid}
+                f"{API_BASE_URL}/transactions/by-year/paid/?year={year}&paid=yes",
                 )
         elif paid == "Unpaid":
             response = requests.get(
-                f"{API_BASE_URL}/transactions/by-year/unpaid/",
-                json={"year": year, "paid": paid}
+                f"{API_BASE_URL}/transactions/by-year/unpaid/?year={year}&paid=no",
                 )
         elif paid == "All":
             response = requests.get(
-                f"{API_BASE_URL}/transactions/by-year/",
-                json={"year": year}
+                f"{API_BASE_URL}/transactions/by-year/?year={year}",
                 )
         
         if response.status_code == 200:
             return response.json(), True
-        return [], False
+        # return [], False
+        return response.json(), False
     except Exception as e:
-        return [], False
+        # return [], False
+        return {"error": str(e)}, False
 
 def update_transaction(tran_id, name, amount, transaction_type, description, date):
     """Update a transaction via API"""
@@ -146,7 +145,7 @@ def main():
     st.sidebar.title("Navigation")
     page = st.sidebar.selectbox(
         "Choose a page",
-        ["👥 Transactions", "☰ Dashboard"]
+        ["👥 Transactions", "📅 Annual"]
     )
 
     if page == "👥 Transactions":
@@ -202,7 +201,7 @@ def transactions_page():
 
             #Display users in a table
             st.dataframe(
-                df[['id', 'name', 'amount', 'transaction_type', 'description', 'paid', 'date']],
+                df[['name', 'amount', 'transaction_type', 'description', 'paid', 'date']],
                 use_container_width=True,
                 hide_index=True
             )
@@ -285,19 +284,19 @@ def annual_page():
                 #Display users in a table
                 if paid == "Paid":
                     st.dataframe(
-                        df[['id', 'name', 'amount', 'transaction_type', 'description', 'date']],
+                        df[['name', 'amount', 'transaction_type', 'description', 'date']],
                         use_container_width=True,
                         hide_index=True
                     )
                 if paid == "Unpaid":
                     st.dataframe(
-                        df[['id', 'name', 'date']],
+                        df[['name', 'date']],
                         use_container_width=True,
                         hide_index=True
                     )
                 if paid == "All":
                     st.dataframe(
-                        df[['id', 'name', 'amount', 'transaction_type', 'description', 'paid', 'date']],
+                        df[['name', 'amount', 'transaction_type', 'description', 'paid', 'date']],
                         use_container_width=True,
                         hide_index=True
                     )
@@ -306,6 +305,10 @@ def annual_page():
                 # st.info(f"Total users: {len(users)}")
             else:
                 st.info("No transactions found")
+                # st.write(year)
+                # st.write(paid)
+                # st.json(trans)
+                # st.json(success)
         else:
             st.error("Please fill in year.")
             
