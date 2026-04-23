@@ -84,7 +84,7 @@ async def create_transaction(tran: TransactionCreate):
 
         #Check if amount = 0(not paid) or not(paid)
         if tran.amount == 0:
-            tran.transaction_type = "debit"
+            tran.transaction_type = ""
             tran.description = ""
             paid = "No"
             tran.date = datetime.now()
@@ -278,7 +278,7 @@ async def update_transaction(tran_id: str, tran_update: TransactionUpdate):
             
         #update transaction
         if tran_update.amount == 0:
-            tran_update.transaction_type = "debit"
+            tran_update.transaction_type = ""
             tran_update.description = ""
             paid = "No"
             tran_update.date = datetime.now()
