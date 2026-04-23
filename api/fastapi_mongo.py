@@ -1,16 +1,3 @@
-# #checklist:
-# #post new user: /
-# #get all users: /
-# #post new post: /
-# #get all posts from specific user: / 
-# #delete user and its posts: /
-# #delete specific post: /
-# #get specific user: 
-# #get specific post:
-# #get all posts: /
-# #put user: /
-# #put post:
-
 from fastapi import FastAPI, HTTPException, status
 from contextlib import asynccontextmanager
 from pydantic import BaseModel, EmailStr
@@ -28,14 +15,6 @@ load_dotenv()
 app = FastAPI(title="MongoDB Database API", version ="1.0.0")
 
 #pydantic models for request/response
-
-# class TransactionType(str, Enum):
-#     debit = "Debit"
-#     credit = "Credit"
-
-# class Paid(str, Enum):
-#     paid = "Paid"
-#     not_paid = "Not Paid"
 
 class TransactionCreate(BaseModel):
     name: str
@@ -74,29 +53,6 @@ class TransactionResponseUnpaid(BaseModel):
     id: str
     name: str
     date: datetime
-
-# class PostCreate(BaseModel):
-#     user_id: str
-#     title: str
-#     content: str
-
-# class PostUpdate(BaseModel):
-#     # user_id: Optional[int] = None
-#     title: Optional[str] = None
-#     content: Optional[str] = None
-
-# class PostResponse(BaseModel):
-#     id: str
-#     user_id: str
-#     title: str
-#     content: str
-#     created_at: datetime
-
-# class PostResponseForUser(BaseModel):
-#     id: str
-#     title: str
-#     content: str
-#     created_at: datetime
 
 #Initialize database
 try:

@@ -18,10 +18,8 @@ class DatabaseManager:
 
     def init_database(self):
         """Initialize database with collections and indexes"""
-        #Create unique index on email for users
+        #Create unique index on date for transactions...?
         self.transaction_collection.create_index("date")
-        #create index on user_id for posts for better query performance
-        # self.posts_collection.create_index("user_id")
 
 #Create data (INSERT) function
     def create_transaction(self, name, amount, transaction_type, description, paid, date):
@@ -34,35 +32,13 @@ class DatabaseManager:
                 "description": description,
                 "paid": paid,
                 "date": date
-                # "created_at": datetime.now()
             }
             result = self.transaction_collection.insert_one(trans_doc)
             return str(result.inserted_id)
         except Exception as e:
             print(f"Error: {e}")
             return None
-        
-    # def create_post(self, user_id, title, content):
-    #     """Create a new post"""
-    #     try:
-    #         #Convert string user_id to ObjectId if it's a valid ObjectId
-    #         if ObjectId.is_valid(user_id):
-    #             user_object_id = ObjectId(user_id)
-    #         else:
-    #             user_object_id = user_id
-
-    #         post_doc = {
-    #             "user_id": user_object_id,
-    #             "title": title,
-    #             "content": content,
-    #             "created_at": datetime.now()
-    #         }
-    #         result = self.posts_collection.insert_one(post_doc)
-    #         return str(result.inserted_id)
-    #     except Exception as e:
-    #         print(f"Error creating post: {e}")
-    #         return None
-        
+                
     def get_all_transactions(self):
         """Get all transactions"""
         try:
@@ -111,28 +87,6 @@ class DatabaseManager:
         except Exception as e:
             print(f"Error fetching transactions: {e}")
             return []
-
-    # def get_user_posts(self, user_id):
-    #     """Get posts by user"""
-    #     try:
-    #         #Convert string user_id to ObjectId if it's a valid ObjectId
-    #         if ObjectId.is_valid(user_id):
-    #             user_object_id = ObjectId(user_id)
-    #         else:
-    #             user_object_id = user_id
-
-    #         posts = list(self.posts_collection.find(
-    #             {"user_id": user_object_id}
-    #         ).sort("created_at", -1))
-            
-    #         #Convert ObjectId to string for display
-    #         for post in posts:
-    #             post['_id'] = str(post['_id'])
-    #         return posts
-        
-    #     except Exception as e:
-    #         print(f"Error fetching users: {e}")
-    #         return []
         
     def update_transaction(self,tran_id, name, amount, transaction_type, description, paid, date):
         """Update existing transaction Id"""
@@ -154,34 +108,14 @@ class DatabaseManager:
             print(f"Error: {e}")
             return None
 
-    # def update_post(self,user_id, title, content):
-    #     """Update existing post based on user ID"""
-    #     try:
-    #         result = self.users_collection.update_one(
-    #             {"_id": ObjectId(user_id)},
-    #             {"$set": {
-    #                 "title": title,
-    #                 "content": content,
-    #                 "updated_at": datetime.now()
-    #             }}
-    #         )
-    #         return result.modified_count
-    #     except Exception as e:
-    #         print(f"Error: {e}")
-    #         return None
-
-
     def delete_transaction(self, tran_id):
         """Delete transaction"""
         try:
-            #Convert string user_id to ObjectId if it's a valid ObjectId
+            #Convert string tran_id to ObjectId if it's a valid ObjectId
             if ObjectId.is_valid(tran_id):
                 tran_object_id = ObjectId(tran_id)
             else:
                 tran_object_id = tran_id
-
-            #Delete user's posts first
-            # self.posts_collection.delete_many({"user_id": user_object_id})
 
             #Delete the user
             result = self.transaction_collection.delete_one({"_id": tran_object_id})
@@ -354,33 +288,6 @@ def main():
                             break
                 else:
                     print("Please type 'paid' or 'unpaid'")
-
-        # elif choice == '5':
-        #     # print("Not there yet")
-            
-        #     print("\n--- Unpaid Transactions ---")
-        #     trans = db.get_unpaid_by_year()
-        #     if trans:
-        #         for tran in trans:
-        #             print(f"ID: {tran['_id']} | Name: {tran['name']} | Date: {tran['date']}")
-        #     else:
-        #         print("No unpaid transactions found.")
-
-            
-        # elif choice == '6':
-            # print("\n--- View User Posts ---")
-            # user_id = input("Enter user ID: ").strip()
-            # posts = db.get_user_posts(user_id)
-
-            # if posts:
-            #     for post in posts:
-            #         print(f"\nPost ID: {post['_id']}")
-            #         print(f"Title: {post['title']}")
-            #         print(f"Content: {post['content']}")
-            #         print(f"Created: {post['created_at']}")
-            #         print("-"*30)
-            # else:
-            #     print("No posts found for this user.")
 
         elif choice == '5':
             print("\n--- Delete Transaction ---")
