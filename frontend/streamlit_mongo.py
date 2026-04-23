@@ -145,16 +145,16 @@ def main():
     st.sidebar.title("Navigation")
     page = st.sidebar.selectbox(
         "Choose a page",
-        ["👥 Transactions", "📅 Annual"]
+        ["💰 Transactions", "📅 Annual"]
     )
 
-    if page == "👥 Transactions":
+    if page == "💰 Transactions":
         transactions_page()
     elif page == "📅 Annual":
         annual_page()
 
 def transactions_page():
-    st.header("👥 Transaction Management")
+    st.header("💰 Transaction Management")
 
     #Create tabs for different transaction operations
     tab1, tab2, tab3 = st.tabs(["Create Transaction", "View Transactions", "Manage Transactions"])
