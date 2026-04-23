@@ -87,7 +87,7 @@ async def create_transaction(tran: TransactionCreate):
             tran.transaction_type = ""
             tran.description = ""
             paid = "No"
-            tran.date = datetime.now()
+            # tran.date = datetime.now()
         else:
             paid = "Yes"
 
@@ -281,7 +281,7 @@ async def update_transaction(tran_id: str, tran_update: TransactionUpdate):
             tran_update.transaction_type = ""
             tran_update.description = ""
             paid = "No"
-            tran_update.date = datetime.now()
+            # tran_update.date = datetime.now()
         else:
             paid = "Yes"
 
