@@ -129,6 +129,17 @@ async def get_all_transactions():
                 detail=f"Internal server error: {str(e)}"
         )
     
+@app.get("/transactions/balance/{year}")
+async def get_balance(year: int):
+    """Get balance for a specific year"""
+    try:
+        result = db.get_balance_by_year(year)
+        return result
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error: {str(e)}"
+        )
     
 @app.get("/transactions/by-year/", response_model=List[TransactionResponse])
 async def get_transactions_by_year(year: int):

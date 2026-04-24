@@ -51,6 +51,36 @@ class DatabaseManager:
             print(f"Error fetching transactions: {e}")
             return []
         
+    def get_balance_by_year(self, year):
+        """Calculate balance for a specific year"""
+        
+        try:
+            start_date = datetime(year, 1, 1)
+            end_date = datetime(year, 12, 31)
+            
+            # Get debit transactions
+            debits = list(self.transaction_collection.find({
+                "paid": "Yes",
+                "transaction_type": "debit",
+                "date": {"$gte": start_date, "$lte": end_date}
+            }))
+            
+            # Get credit transactions
+            credits = list(self.transaction_collection.find({
+                "paid": "Yes",
+                "transaction_type": "credit",
+                "date": {"$gte": start_date, "$lte": end_date}
+            }))
+            
+            debit_sum = sum(debit.get('amount', 0) for debit in debits)
+            credit_sum = sum(credit.get('amount', 0) for credit in credits)
+            balance = debit_sum - credit_sum
+            
+            return {"debit_sum": debit_sum, "credit_sum": credit_sum, "balance": balance}
+        except Exception as e:
+            print(f"Error calculating balance: {e}")
+            return {"error": str(e)}
+
     def get_transaction_by_year(self, year, paid):
         """Get transactions for specific year."""
         try:

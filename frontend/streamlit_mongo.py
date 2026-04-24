@@ -47,7 +47,17 @@ def get_all_transactions():
         return [], False
     except Exception as e:
         return [], False
-    
+
+def get_balance_by_year(year):
+    """Get balance for year via API"""
+    try:
+        response = requests.get(f"{API_BASE_URL}/transactions/balance/{year}")
+        if response.status_code == 200:
+            return response.json(), True
+        return response.json(), False
+    except Exception as e:
+        return {"error": str(e)}, False
+
 def get_transactions_by_year(year, paid):
     """Get transactions by year via API"""
     try:
@@ -137,6 +147,7 @@ def transactions_page():
             if submitted:
                 if name:
                     # paid = "Yes" if amount > 0 else "No"
+                    transaction_type = transaction_type.lower()
                     date_obj = datetime.combine(date,time.min)
                     result, success = create_transaction(name, amount, transaction_type, description, date_obj)
                     # st.json(result)
@@ -190,11 +201,12 @@ def transactions_page():
                     with st.form("update_transaction_form"):
                         new_name = st.text_input("Name", value=selected_tran['name'])
                         new_amount = st.number_input("Amount", min_value=0, value=selected_tran['amount'])
-                        new_tran_type = st.text_input("Transaction Type", value=selected_tran['transaction_type'])
+                        new_tran_type = st.selectbox("Transaction Type", ["Debit", "Credit"], placeholder="Select transaction type")
                         new_desc = st.text_input("Description", value=selected_tran['description'])
                         new_date = st.date_input("Date", value=selected_tran['date'])
 
                         if st.form_submit_button("Update Transaction", type = "primary"):
+                            new_tran_type = new_tran_type.lower()
                             result, success = update_transaction(selected_tran_id, new_name, new_amount, new_tran_type, new_desc, new_date)
                             if success:
                                 st.success("Transaction updated successfully")
@@ -231,6 +243,13 @@ def annual_page():
     if submit:
         if year:
             trans, success = get_transactions_by_year(year, paid)
+            balance, balance_success = get_balance_by_year(year)
+
+            if balance_success and "error" not in balance:
+                col1, col2, col3 = st.columns(3)
+                col1.metric("Total Debit: ", f"RM{balance['debit_sum']}")
+                col1.metric("Total Credit: ", f"RM{balance['credit_sum']}")
+                col1.metric("Balance: ", f"RM{balance['balance']}")
 
             if success and trans:
                 #Convert to DataFrame for better display
