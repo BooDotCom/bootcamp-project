@@ -61,14 +61,14 @@ class DatabaseManager:
             # Get debit transactions
             debits = list(self.transaction_collection.find({
                 "paid": "Yes",
-                "transaction_type": "debit",
+                "transaction_type": "Debit",
                 "date": {"$gte": start_date, "$lte": end_date}
             }))
             
             # Get credit transactions
             credits = list(self.transaction_collection.find({
                 "paid": "Yes",
-                "transaction_type": "credit",
+                "transaction_type": "Credit",
                 "date": {"$gte": start_date, "$lte": end_date}
             }))
             

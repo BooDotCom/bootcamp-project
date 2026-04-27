@@ -147,7 +147,7 @@ def transactions_page():
             if submitted:
                 if name:
                     # paid = "Yes" if amount > 0 else "No"
-                    transaction_type = transaction_type.lower()
+                    # transaction_type = transaction_type.lower()
                     date_obj = datetime.combine(date,time.min)
                     result, success = create_transaction(name, amount, transaction_type, description, date_obj)
                     # st.json(result)
@@ -201,12 +201,18 @@ def transactions_page():
                     with st.form("update_transaction_form"):
                         new_name = st.text_input("Name", value=selected_tran['name'])
                         new_amount = st.number_input("Amount", min_value=0, value=selected_tran['amount'])
-                        new_tran_type = st.selectbox("Transaction Type", ["Debit", "Credit"], placeholder="Select transaction type")
+                        
+                        options = ["Debit", "Credit"]
+                        try:
+                            current_index = options.index(selected_tran['transaction_type'])
+                        except ValueError:
+                            current_index = 0
+                        new_tran_type = st.selectbox("Transaction Type", ["Debit", "Credit"], index=current_index)
                         new_desc = st.text_input("Description", value=selected_tran['description'])
                         new_date = st.date_input("Date", value=selected_tran['date'])
 
                         if st.form_submit_button("Update Transaction", type = "primary"):
-                            new_tran_type = new_tran_type.lower()
+                            # new_tran_type = new_tran_type.lower()
                             result, success = update_transaction(selected_tran_id, new_name, new_amount, new_tran_type, new_desc, new_date)
                             if success:
                                 st.success("Transaction updated successfully")
