@@ -59,6 +59,12 @@ class DatabaseManager:
             end_date = datetime(year, 12, 31)
             
             # Get debit transactions
+            cumu_debits = list(self.transaction_collection.find({
+                "paid": "Yes",
+                "transaction_type": "Debit",
+                "date": {"$lte": end_date}
+            }))
+            
             debits = list(self.transaction_collection.find({
                 "paid": "Yes",
                 "transaction_type": "Debit",
@@ -66,17 +72,27 @@ class DatabaseManager:
             }))
             
             # Get credit transactions
+            cumu_credits = list(self.transaction_collection.find({
+                "paid": "Yes",
+                "transaction_type": "Credit",
+                "date": {"$lte": end_date}
+            }))
+
             credits = list(self.transaction_collection.find({
                 "paid": "Yes",
                 "transaction_type": "Credit",
                 "date": {"$gte": start_date, "$lte": end_date}
             }))
             
+            cumu_debit_sum = sum(debit.get('amount', 0) for debit in cumu_debits)
+            cumu_credit_sum = sum(credit.get('amount', 0) for credit in cumu_credits)
+            cumu_balance = cumu_debit_sum - cumu_credit_sum
             debit_sum = sum(debit.get('amount', 0) for debit in debits)
             credit_sum = sum(credit.get('amount', 0) for credit in credits)
             balance = debit_sum - credit_sum
             
-            return {"debit_sum": debit_sum, "credit_sum": credit_sum, "balance": balance}
+            return {"cumu_debit_sum": cumu_debit_sum, "cumu_credit_sum": cumu_credit_sum, "cumu_balance": cumu_balance,
+                    "debit_sum": debit_sum, "credit_sum": credit_sum, "balance": balance}
         except Exception as e:
             print(f"Error calculating balance: {e}")
             return {"error": str(e)}

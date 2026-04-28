@@ -255,10 +255,13 @@ def annual_page():
                 col1, col2, col3 = st.columns(3)
                 with col1:
                     st.metric(f"Total Debit for {year}: ", f"RM{balance['debit_sum']}")
+                    st.metric(f"Total Debit until {year}: ", f"RM{balance['cumu_debit_sum']}")
                 with col2:
                     st.metric(f"Total Credit for {year}: ", f"RM{balance['credit_sum']}")
+                    st.metric(f"Total Credit until {year}: ", f"RM{balance['cumu_credit_sum']}")
                 with col3:
                     st.metric(f"Balance for {year}: ", f"RM{balance['balance']}")
+                    st.metric(f"Balance until {year}: ", f"RM{balance['cumu_balance']}")
 
             if success and trans:
                 #Convert to DataFrame for better display
@@ -267,6 +270,9 @@ def annual_page():
                     df['date'] = pd.to_datetime(df['date'], format='ISO8601').dt.strftime('%d-%m')
                 except Exception as e:
                     st.warning(f"Date formatting issue: {e}")
+
+                st.markdown("---")
+                st.subheader(f"List of transactions for {year}")
 
                 #Display users in a table
                 if paid == "Paid":
