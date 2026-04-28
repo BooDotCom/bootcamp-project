@@ -253,9 +253,12 @@ def annual_page():
 
             if balance_success and "error" not in balance:
                 col1, col2, col3 = st.columns(3)
-                col1.metric("Total Debit: ", f"RM{balance['debit_sum']}")
-                col1.metric("Total Credit: ", f"RM{balance['credit_sum']}")
-                col1.metric("Balance: ", f"RM{balance['balance']}")
+                with col1:
+                    st.metric("Total Debit: ", f"RM{balance['debit_sum']}")
+                with col2:
+                    st.metric("Total Credit: ", f"RM{balance['credit_sum']}")
+                with col3:
+                    st.metric("Balance: ", f"RM{balance['balance']}")
 
             if success and trans:
                 #Convert to DataFrame for better display
